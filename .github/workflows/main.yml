@@ -6,8 +6,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version'
+        description: 'Tag name'
         required: true
+        type: string
       
   
 permissions:
@@ -35,16 +36,16 @@ jobs:
       run: yarn build
     - name: Integration tests
       run: yarn test:e2e
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
+    - name: tag
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
-      with:
-        tag_name: ${{ input.version }}
-        release_name: Release ${{ input.version }}
-        draft: false
-        prerelease: false
+        TAG: ${{ github.event.inputs.version }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      if: github.event_name == "workflow_dispatch"
+      run: |
+        git config user.name "github-bot"
+        git config user.email "github-bot@noreply.com"
+        git tag -a "${TAG}" -m "Release ${TAG}"
+        git push origin "refs/tags/${TAG}"
     - name: Collect test reports
       uses: EnricoMi/publish-unit-test-result-action@v1
       if: always()
