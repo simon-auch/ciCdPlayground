@@ -6,7 +6,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        type
+        description: 'Version'
+        required: true
+      
   
 permissions:
   checks: write
