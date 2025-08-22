@@ -4,6 +4,9 @@ on:
   push:
   pull_request:
   workflow_dispatch:
+    inputs:
+      version:
+        type
   
 permissions:
   checks: write
@@ -30,6 +33,16 @@ jobs:
       run: yarn build
     - name: Integration tests
       run: yarn test:e2e
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+      with:
+        tag_name: ${{ input.version }}
+        release_name: Release ${{ input.version }}
+        draft: false
+        prerelease: false
     - name: Collect test reports
       uses: EnricoMi/publish-unit-test-result-action@v1
       if: always()
